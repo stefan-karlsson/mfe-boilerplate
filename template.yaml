@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Conditions:
+  isProduction: !Equals ['{{resolve:ssm:/global/EnvironmentName}}', prod]
+
+Parameters:
+  GitHubToken:
+    Type: String
+    Description: GitHub token for accessing private repositories
+    NoEcho: true
+
+Resources:
+  GitHubSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+
+      Description: GitHub access token used for CI/CD.
+      SecretString: !Ref GitHubToken
+  AmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+
+      Name: !Ref AWS::StackName
+      Description: Admin shell application that acts as a host for micro frontends
+      Platform: WEB
+      EnableBranchAutoDeletion: true
+      AutoBranchCreationConfig:
+        AutoBranchCreationPatterns:
+          - feat/**
+          - fix/**
+          - perf/**
+          - refactor/**
+          - test/**
+          - revert/**
+          - chore/**
+          - docs/**
+          - style/**
+          - ci/**
+          - build/**
+        EnableAutoBranchCreation: true
+        EnableAutoBuild: true
+        EnablePerformanceMode: false
+        EnablePullRequestPreview: true
+        PullRequestEnvironmentName: develop
+      AccessToken: !Sub '{{resolve:secretsmanager:${GitHubSecret}:SecretString}}'
+      Repository: !Sub https://github.com/mathem-se/${AWS::StackName}
+
+      CustomRules:
+        - Source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|json|map)$)([^.]+$)/>'
+          Target: '/index.html'
+          Status: 200
+      BuildSpec: |
+        version: 1
+        env:
+          variables:
+            HUSKY: 0 # Disable Husky hooks
+        test:
+          phases:
+            preTest:
+              commands:
+                - npm ci
+                - npm install wait-on
+                - npm install pm2
+                - npm install mocha mochawesome mochawesome-merge mochawesome-report-generator
+                - npx pm2 start npm -- start
+                - 'npx wait-on http://localhost:3001/'
+            test:
+              commands:
+                - npm run test
+                - npx cypress run --reporter mochawesome --reporter-options "reportDir=cypress/report/mochawesome-report,overwrite=false,html=false,json=true,timestamp=mmddyyyy_HHMMss"
+            postTest:
+              commands:
+                - npx mochawesome-merge cypress/report/mochawesome-report/mochawesome*.json > cypress/report/mochawesome.json
+                - npx pm2 kill # Kill the e2e test server
+          artifacts:
+            baseDirectory: cypress
+            configFilePath: '**/mochawesome.json'
+            files:
+              - '**/*.png'
+              - '**/*.mp4'
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm ci
+            build:
+              commands:
+                - npm run build
+          artifacts:
+            baseDirectory: dist
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+
+  GitBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyApp.AppId
+      BranchName: !If [isProduction, main, develop]
+      EnableAutoBuild: true
+      Description: The GitHub Branch used to deploy the application
+  Domain:
+    Type: AWS::Amplify::Domain
+    Properties:
+      DomainName: !If [isProduction, mathem.se, mhdev.se]
+      AppId: !GetAtt AmplifyApp.AppId
+      EnableAutoSubDomain: true
+      SubDomainSettings:
+        - Prefix: !Ref AWS::StackName
+          BranchName: !GetAtt GitBranch.BranchName

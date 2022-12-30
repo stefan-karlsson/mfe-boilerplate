@@ -1,0 +1,15 @@
+version = 0.1
+[default.global.parameters]
+stack_name = "mfe-admin-shell"
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+s3_bucket = "aws-sam-cli-managed-dev-pipeline-artifactsbucket-16oi0nqercqhg"
+s3_prefix = "mfe-admin-shell"
+region = "eu-west-1"
+capabilities = "CAPABILITY_IAM"
+on_failure = "DELETE"
+# parameter_overrides = "GitHubToken=<token-here>"
+[default.sync.parameters]
+watch = true

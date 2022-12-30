@@ -1,0 +1,14 @@
+{
+  "files.associations": { "*.scss": "postcss" },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "/.github/workflows/*.yml",
+    "https://raw.githubusercontent.com/aws/serverless-application-model/develop/samtranslator/schema/schema.json": "/template.yaml"
+  },
+  "remote.WSL.debug": true,
+  "remote.WSL.useShellEnvironment": true,
+  "cfn-resource-actions.stackName": "",
+  "cfnLint.format.printWidth": 120,
+  "cfnLint.format.singleQuote": true,
+  "cfnLint.validateUsingJsonSchema": true
+}

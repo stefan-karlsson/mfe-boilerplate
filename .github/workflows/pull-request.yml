@@ -1,0 +1,8 @@
+name: Test PR
+on: [pull_request]
+
+jobs:
+  PR:
+    uses: mathem-se/gh-workflows-node/.github/workflows/pull-request.yml@main
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_READ_ONLY}}

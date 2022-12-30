@@ -1,0 +1,63 @@
+{
+  "name": "mfe-admin-shell",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsx build/build-shell.ts",
+    "build:watch": "tsx build/build-shell.ts --watch",
+    "start": "npm run build && esbuild dist/main.js --servedir=dist --outdir=dist --bundle --allow-overwrite",
+    "lint": "eslint --config eslint.config.js",
+    "lint:fix": "eslint --config eslint.config.js --fix",
+    "lint:staged": "lint-staged",
+    "format:write": "prettier --write .",
+    "prepare": "npx husky install",
+    "test": "vitest run --config vitest.config.ts",
+    "test:ci": "vitest run --coverage --reporter=json --outputFile.json=./coverage/report.json"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "single-spa": "^5.9.4"
+  },
+  "devDependencies": {
+    "@softarc/native-federation": "^1.0.3",
+    "@softarc/native-federation-esbuild": "^1.0.3",
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
+    "@cspell/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
+    "@vitest/coverage-c8": "^0.24.5",
+    "autoprefixer": "^10.4.13",
+    "commitizen": "^4.2.5",
+    "cypress": "^11.2.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "esbuild": "^0.16.4",
+    "esbuild-style-plugin": "^1.6.1",
+    "eslint": "^8.28.0",
+    "eslint-plugin-jsdoc": "^39.6.4",
+    "eslint-plugin-markdown": "^3.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-unicorn": "^45.0.0",
+    "husky": "^8.0.0",
+    "jsdom": "^20.0.3",
+    "lint-staged": "^13.0.3",
+    "micromatch": "^4.0.5",
+    "prettier": "^2.8.0",
+    "sass": "^1.57.1",
+    "tailwindcss": "^3.2.4",
+    "tsx": "^3.12.1",
+    "typescript": "^4.9.3",
+    "vitest": "^0.24.5"
+  },
+  "browserslist": [
+    ">0.3%",
+    "not ie 11",
+    "not dead",
+    "not op_mini all"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

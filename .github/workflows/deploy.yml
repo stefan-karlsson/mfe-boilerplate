@@ -1,0 +1,24 @@
+name: Deploy to AWS
+on:
+  push:
+    branches: [main, develop]
+
+env:
+  HUSKY: 0 # Disable Husky hooks
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    uses: mathem-se/gh-workflows-node/.github/workflows/deploy-aws.yml@main
+    with:
+      domain: mfe-admin-shell
+      team: dev-b2b
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGE_READ_ONLY}}
+      AWS_CICD_ACCOUNT: ${{ secrets.AWS_CICD_ACCOUNT }}
+      AWS_CICD_API_URL: ${{ secrets.AWS_CICD_API_URL }}
+      AWS_CICD_API_REGION: ${{ secrets.AWS_CICD_API_REGION }}
